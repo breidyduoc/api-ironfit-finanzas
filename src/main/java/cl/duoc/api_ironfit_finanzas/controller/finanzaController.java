@@ -20,7 +20,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/pagos")
+@RequestMapping("/api/v3/pagos")
 public class finanzaController {
 
     private final finanzaService service;

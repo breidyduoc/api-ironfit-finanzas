@@ -79,7 +79,7 @@ public class finanzaService {
     public boolean tieneDeuda(String rut) {
 
         socioDTO socio = restTemplate.getForObject(
-                "http://localhost:21502/api/v1/socios/rut/" + rut,
+                "http://localhost:21502/api/v3/socios/rut/" + rut,
                 socioDTO.class
         );
 
