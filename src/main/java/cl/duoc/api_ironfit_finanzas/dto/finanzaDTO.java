@@ -3,6 +3,8 @@ package cl.duoc.api_ironfit_finanzas.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class finanzaDTO {
 
@@ -16,7 +18,7 @@ public class finanzaDTO {
     private Integer anio;
 
     @NotNull(message = "El monto es obligatorio")
-    private Double monto;
+    private BigDecimal monto;
 
     @NotBlank(message = "El estado es obligatorio")
     private String estado;
