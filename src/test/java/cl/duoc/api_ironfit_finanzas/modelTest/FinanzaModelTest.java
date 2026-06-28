@@ -6,7 +6,6 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -24,34 +23,27 @@ public class FinanzaModelTest {
         }
     }
 
-    // testeo del 200 respuesta ok
+    // 200 OK (válido)
     @Test
-    @DisplayName("Un pago válido está correcto")
-    void pagoValido() {
-        finanzaModel p = new finanzaModel();
-        p.setRutSocio("12345678-9");
-        p.setMes(6);
-        p.setAnio(2026);
-        p.setMonto(25000.0);
-        p.setEstado("PAGADO");
+    void finanza_valida() {
+        finanzaModel f = new finanzaModel();
+        f.setRutSocio("12345678-9");
+        f.setMonto(20000.0);
+        f.setEstado("PENDIENTE");
 
-        Set<ConstraintViolation<finanzaModel>> v = valid.validate(p);
+        Set<ConstraintViolation<finanzaModel>> v = valid.validate(f);
 
         assertTrue(v.isEmpty());
     }
 
-    // testeo del 400 respuesta bad request
+    // 400 BAD REQUEST (inválido)
     @Test
-    @DisplayName("Pago con estado inválido")
-    void pagoEstadoInvalido() {
-        finanzaModel p = new finanzaModel();
-        p.setRutSocio("12345678-9");
-        p.setMes(6);
-        p.setAnio(2026);
-        p.setMonto(25000.0);
-        p.setEstado("ERROR");
+    void finanza_invalida() {
+        finanzaModel f = new finanzaModel();
+        f.setRutSocio(""); // inválido
+        f.setMonto(null);
 
-        Set<ConstraintViolation<finanzaModel>> v = valid.validate(p);
+        Set<ConstraintViolation<finanzaModel>> v = valid.validate(f);
 
         assertFalse(v.isEmpty());
     }

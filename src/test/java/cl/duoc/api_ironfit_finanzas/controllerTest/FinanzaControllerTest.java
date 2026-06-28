@@ -1,10 +1,10 @@
 package cl.duoc.api_ironfit_finanzas.controllerTest;
 
 import cl.duoc.api_ironfit_finanzas.controller.finanzaController;
+import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
 import cl.duoc.api_ironfit_finanzas.service.finanzaService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,9 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,30 +28,106 @@ public class FinanzaControllerTest {
     @InjectMocks
     private finanzaController controller;
 
-    private finanzaModel pago;
+    private finanzaDTO finanzaDTO;
+    private finanzaModel finanzaModel;
 
     @BeforeEach
-    void a() {
-        pago = new finanzaModel();
-        pago.setId(1L);
-        pago.setRutSocio("12345678-9");
-        pago.setMes(6);
-        pago.setAnio(2026);
-        pago.setMonto(25000.0);
-        pago.setEstado("PAGADO");
+    void setup() {
+
+        // DTO lo que recibe el controller
+        finanzaDTO = new finanzaDTO();
+        finanzaDTO.setRutSocio("12345678-9");
+        finanzaDTO.setMonto(20000.0);
+        finanzaDTO.setEstado("PENDIENTE");
+
+        // MODEL lo que devuelve el service
+        finanzaModel = new finanzaModel();
+        finanzaModel.setId(1L);
+        finanzaModel.setRutSocio("12345678-9");
+        finanzaModel.setMonto(20000.0);
+        finanzaModel.setEstado("PENDIENTE");
     }
 
-    // testeo de 200 respuesta ok
+    // 200 OK - GET ALL
     @Test
-    @DisplayName("Código 200 - Obtiene todos los pagos")
-    void obtenerTodosOk() {
-        when(service.obtenerTodosLosPagos()).thenReturn(List.of(pago));
+    void getAll_200() {
 
-        ResponseEntity<List<finanzaModel>> response = controller.obtenerTodos();
+        when(service.obtenerTodosLosPagos())
+                .thenReturn(List.of(finanzaModel));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerTodos();
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().size());
     }
-}
 
+    // 200 OK - GET BY ID
+    @Test
+    void getById_200() {
+
+        when(service.obtenerPagoPorId(1L))
+                .thenReturn(Optional.of(finanzaModel));
+
+        ResponseEntity<finanzaModel> response =
+                controller.obtenerPorId(1L);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+    }
+
+    // 404 NOT FOUND
+    @Test
+    void getById_404() {
+
+        when(service.obtenerPagoPorId(99L))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<finanzaModel> response =
+                controller.obtenerPorId(99L);
+
+        assertEquals(404, response.getStatusCode().value());
+    }
+
+    // 201 CREATED
+    @Test
+    void create_201() {
+
+        when(service.crearPago(any(finanzaDTO.class)))
+                .thenReturn(finanzaModel);
+
+        ResponseEntity<finanzaModel> response =
+                controller.crearPago(finanzaDTO);
+
+        assertEquals(201, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals("12345678-9", response.getBody().getRutSocio());
+    }
+
+    // 400 BAD REQUEST
+    @Test
+    void badRequest_400() {
+
+        when(service.crearPago(any(finanzaDTO.class)))
+                .thenThrow(new IllegalArgumentException());
+
+        ResponseEntity<finanzaModel> response =
+                controller.crearPago(finanzaDTO);
+
+        assertEquals(400, response.getStatusCode().value());
+    }
+
+    // 500 ERROR
+    @Test
+    void server_500() {
+
+        when(service.obtenerTodosLosPagos())
+                .thenThrow(new RuntimeException("error"));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerTodos();
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+}
