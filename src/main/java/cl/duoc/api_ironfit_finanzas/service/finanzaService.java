@@ -1,11 +1,13 @@
 package cl.duoc.api_ironfit_finanzas.service;
 
 import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
+import cl.duoc.api_ironfit_finanzas.dto.socioDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
 import cl.duoc.api_ironfit_finanzas.repository.finanzaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class finanzaService {
 
     private final finanzaRepository repository;
+    private final RestTemplate restTemplate;
 
     private void mapearDtoAModel (finanzaDTO dto, finanzaModel model){
         model.setRutSocio(dto.getRutSocio());
@@ -74,9 +77,19 @@ public class finanzaService {
     }
 
     public boolean tieneDeuda(String rut) {
+
+        socioDTO socio = restTemplate.getForObject(
+                "http://localhost:21502/api/v1/socios/rut/" + rut,
+                socioDTO.class
+        );
+
+        if (socio == null) {
+            return false;
+        }
+
         Optional<finanzaModel> pago = repository.findByRutSocio(rut);
 
         return pago.isPresent() &&
-                pago.get().getEstado().equals("MOROSO");
+                pago.get().getEstado().equalsIgnoreCase("MOROSO");
     }
 }
