@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "PAGO",schema = "ADMIN")
 @Data
@@ -31,7 +33,7 @@ public class finanzaModel {
     @Column(name = "MONTO", nullable = false)
     @NotNull(message = "El monto es obligatorio")
     @Positive(message = "El monto debe ser mayor a 0")
-    private Double monto;
+    private BigDecimal monto;
 
     @Column(name = "ESTADO", nullable = false, length = 20)
     @NotBlank(message = "El estado es obligatorio")
