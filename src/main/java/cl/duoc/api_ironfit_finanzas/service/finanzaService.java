@@ -89,7 +89,8 @@ public class finanzaService {
 
         Optional<finanzaModel> pago = repository.findByRutSocio(rut);
 
-        return pago.isPresent() &&
-                pago.get().getEstado().equalsIgnoreCase("MOROSO");
+        return socio.getEstado().equalsIgnoreCase("SUSPENDIDO")
+                || (pago.isPresent()
+                && pago.get().getEstado().equalsIgnoreCase("MOROSO"));
     }
 }
