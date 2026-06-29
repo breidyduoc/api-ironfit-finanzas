@@ -39,7 +39,7 @@ public class finanzaService {
         return repository.findByRutSocio(rut);
     }
 
-    public Optional<finanzaModel> obtenerPagoPorEstado(String estado) {
+    public List<finanzaModel> obtenerPagoPorEstado(String estado) {
         return repository.findByEstado(estado);
     }
 

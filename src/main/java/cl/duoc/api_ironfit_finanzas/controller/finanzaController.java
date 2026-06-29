@@ -106,7 +106,7 @@ public class finanzaController {
 
 
 
-    @GetMapping("/estado/{estadoPago}")
+    @GetMapping("/estado/{estado}")
     @Operation(
             summary = "Buscar pagos por estado",
             description = "Obtiene un pago filtrado según su estado actual (PAGADO, PENDIENTE o MOROSO)"
@@ -142,16 +142,20 @@ public class finanzaController {
                     )
             )
     })
-    public ResponseEntity<finanzaModel> obtenerPorEstado(
+    public ResponseEntity<List<finanzaModel>> obtenerPorEstado(
             @Parameter(
                     description = "Estado del pago",
                     example = "MOROSO"
             )
-            @PathVariable String estadoPago
+            @PathVariable String estado
     ) {
-        return service.obtenerPagoPorEstado(estadoPago)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        List<finanzaModel> pagos = service.obtenerPagoPorEstado(estado);
+
+        if (pagos.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(pagos);
     }
 
 

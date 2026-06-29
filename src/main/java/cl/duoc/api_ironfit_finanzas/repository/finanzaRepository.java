@@ -11,7 +11,5 @@ import java.util.Optional;
 public interface finanzaRepository extends JpaRepository<finanzaModel, Long> {
     Optional<finanzaModel> findByRutSocio(String rutSocio);
 
-    Optional<finanzaModel> findByEstado(String estado);
-
-    List<finanzaModel> findAllByRutSocio(String rut);
+    List<finanzaModel> findByEstado(String estado);
 }
