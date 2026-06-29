@@ -247,11 +247,7 @@ public class finanzaController {
             @PathVariable Long id,
             @RequestBody Map<String, String> request
     ) {
-        String nuevoEstado = request.get("estadoPago");
-
-        if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
+        String nuevoEstado = request.get("estado");
 
         return service.actualizarEstado(id, nuevoEstado)
                 .map(ResponseEntity::ok)
