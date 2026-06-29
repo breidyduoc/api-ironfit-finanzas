@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,14 +37,14 @@ public class FinanzaServiceTest {
         // DTO entrada service
         finanzaDTO = new finanzaDTO();
         finanzaDTO.setRutSocio("12345678-9");
-        finanzaDTO.setMonto(20000.0);
+        finanzaDTO.setMonto(BigDecimal.valueOf(20000.0));
         finanzaDTO.setEstado("PENDIENTE");
 
         // MODEL entrada repository
         finanzaModel = new finanzaModel();
         finanzaModel.setId(1L);
         finanzaModel.setRutSocio("12345678-9");
-        finanzaModel.setMonto(20000.0);
+        finanzaModel.setMonto(BigDecimal.valueOf(20000.0));
         finanzaModel.setEstado("PENDIENTE");
     }
 
@@ -91,7 +92,7 @@ public class FinanzaServiceTest {
 
         assertNotNull(result);
         assertEquals("12345678-9", result.getRutSocio());
-        assertEquals(20000.0, result.getMonto());
+        assertEquals(BigDecimal.valueOf(20000.0), result.getMonto());
     }
 
     // ERROR - 500

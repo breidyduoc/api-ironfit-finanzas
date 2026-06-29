@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,14 +38,14 @@ public class FinanzaControllerTest {
         // DTO lo que recibe el controller
         finanzaDTO = new finanzaDTO();
         finanzaDTO.setRutSocio("12345678-9");
-        finanzaDTO.setMonto(20000.0);
+        finanzaDTO.setMonto(BigDecimal.valueOf(20000.0));
         finanzaDTO.setEstado("PENDIENTE");
 
         // MODEL lo que devuelve el service
         finanzaModel = new finanzaModel();
         finanzaModel.setId(1L);
         finanzaModel.setRutSocio("12345678-9");
-        finanzaModel.setMonto(20000.0);
+        finanzaModel.setMonto(BigDecimal.valueOf(20000.0));
         finanzaModel.setEstado("PENDIENTE");
     }
 
