@@ -1,5 +1,31 @@
 # API IronFit - Finanzas
 
+## Contexto del proyecto
+
+IronFit es un sistema de gestión para gimnasios desarrollado bajo una arquitectura de microservicios. Su objetivo es administrar la información de los socios y la gestión financiera del gimnasio mediante APIs REST que se comunican entre sí.
+
+Este microservicio corresponde a la administración financiera de los socios y se integra con la API Socios para verificar el estado de los usuarios y determinar la existencia de deudas.
+
+---
+
+## Integrantes
+
+- Breidy Pimienta
+- Gabriel Marambio
+
+---
+
+## Microservicios del proyecto
+
+El proyecto está compuesto por los siguientes microservicios:
+
+- **API IronFit - Socios**
+- **API IronFit - Finanzas**
+
+La comunicación entre ambos microservicios se realiza mediante **RestTemplate**.
+
+---
+
 ## Descripción
 
 Microservicio encargado de la gestión financiera de los socios dentro del sistema IronFit.
@@ -77,10 +103,11 @@ CREATE TABLE PAGO (
 
 ## Ejecución
 
-- Clonar el repositorio.
-- Configurar la conexión a Oracle.
-- Ejecutar el script SQL.
-- Ejecutar:
+1. Clonar el repositorio.
+2. Configurar la conexión a Oracle Database.
+3. Ejecutar el script SQL.
+4. Configurar las credenciales en `application.yml`.
+5. Ejecutar:
 
 ```bash
 mvn clean install
@@ -91,7 +118,7 @@ mvn spring-boot:run
 
 ## Puerto
 
-21503
+**21503**
 
 ---
 
@@ -151,7 +178,7 @@ Determina si posee deuda
 
 ## Manejo global de excepciones
 
-El proyecto implementa un Global Exception Handler para centralizar el manejo de errores.
+El proyecto implementa un **Global Exception Handler** para centralizar el manejo de errores.
 
 ### Errores gestionados
 
@@ -197,6 +224,10 @@ El proyecto incluye pruebas unitarias para:
 - Controller
 
 ### Cobertura
+
+Las pruebas unitarias alcanzan una cobertura mínima del **80%** del código.
+
+Se validan los siguientes códigos de respuesta:
 
 - 200 OK
 - 201 Created
