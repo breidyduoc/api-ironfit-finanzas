@@ -79,30 +79,26 @@ public class finanzaService {
 
     public estadoFinancieroDTO obtenerEstadoFinanciero(String rut){
 
-        List<finanzaModel> pagos =
-                repository.findByRutSocio(rut);
+        List<finanzaModel> pagos = repository.findByRutSocio(rut);
 
-
-        boolean deuda = pagos.stream()
-                .anyMatch(
-                        pago -> pago.getEstado()
-                                .equalsIgnoreCase("MOROSO")
-                );
-
-
-        estadoFinancieroDTO dto =
-                new estadoFinancieroDTO();
-
+        estadoFinancieroDTO dto = new estadoFinancieroDTO();
         dto.setRut(rut);
-        dto.setPoseeDeuda(deuda);
 
+        boolean moroso = pagos.stream()
+                .anyMatch(p -> p.getEstado().equalsIgnoreCase("MOROSO"));
 
-        if(deuda){
-            dto.setEstado("MOROSO");
-        }else{
-            dto.setEstado("AL DIA");
+        boolean pendiente = pagos.stream()
+                .anyMatch(p -> p.getEstado().equalsIgnoreCase("PENDIENTE"));
+
+        dto.setPoseeDeuda(moroso || pendiente);
+
+        if (moroso) {
+            dto.setEstadoF("MOROSO");
+        } else if (pendiente) {
+            dto.setEstadoF("PENDIENTE");
+        } else {
+            dto.setEstadoF("PAGADO");
         }
-
 
         return dto;
     }

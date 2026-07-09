@@ -6,5 +6,5 @@ import lombok.Data;
 public class estadoFinancieroDTO {
     private String rut;
     private boolean poseeDeuda;
-    private String estado;
+    private String estadoF;
 }
