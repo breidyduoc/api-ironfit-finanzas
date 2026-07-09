@@ -35,16 +35,63 @@ public class finanzaService {
         return repository.findById(id);
     }
 
-    public Optional<finanzaModel> obtenerPagoPorRut(String rut) {
-        return repository.findByRutSocio(rut);
+    public List<finanzaModel> obtenerHistorialPagos(String rut){
+        return repository.findByRutSocioOrderByAnioDescMesDesc(rut);
     }
 
     public List<finanzaModel> obtenerPagoPorEstado(String estado) {
         return repository.findByEstado(estado);
     }
 
+    public List<finanzaModel> obtenerPagosPorMes(Integer mes){
+
+        List<finanzaModel> pagos = repository.findByMes(mes);
+
+        if(pagos.isEmpty()){
+            throw new RuntimeException("No existen pagos para el mes indicado.");
+        }
+
+        return pagos;
+    }
+
+    public List<finanzaModel> obtenerPagosPorAnio(Integer anio){
+
+        List<finanzaModel> pagos = repository.findByAnio(anio);
+
+        if(pagos.isEmpty()){
+            throw new RuntimeException("No existen pagos para el año indicado.");
+        }
+
+        return pagos;
+    }
+
+    public List<finanzaModel> obtenerPagosPorPeriodo(Integer mes, Integer anio) {
+
+        List<finanzaModel> pagos = repository.findByMesAndAnio(mes, anio);
+
+        if (pagos.isEmpty()) {
+            throw new RuntimeException("No existen pagos registrados para ese período.");
+        }
+
+        return pagos;
+    }
+
     @Transactional
     public finanzaModel crearPago(finanzaDTO dto) {
+
+        Optional<finanzaModel> pagoExistente =
+                repository.findByRutSocioAndMesAndAnio(
+                        dto.getRutSocio(),
+                        dto.getMes(),
+                        dto.getAnio()
+                );
+
+        if (pagoExistente.isPresent()) {
+            throw new IllegalStateException(
+                    "El socio ya posee un pago registrado para ese mes y año."
+            );
+        }
+
         finanzaModel pago = new finanzaModel();
         mapearDtoAModel(dto, pago);
 
@@ -79,7 +126,7 @@ public class finanzaService {
     public boolean tieneDeuda(String rut) {
 
         socioDTO socio = restTemplate.getForObject(
-                "http://localhost:21502/api/v3/socios/rut/" + rut,
+                "http://localhost:21502/api/v4/socios/rut/" + rut,
                 socioDTO.class
         );
 
@@ -87,10 +134,10 @@ public class finanzaService {
             return false;
         }
 
-        Optional<finanzaModel> pago = repository.findByRutSocio(rut);
+        List<finanzaModel> pagos = repository.findByRutSocio(rut);
 
         return socio.getEstado().equalsIgnoreCase("SUSPENDIDO")
-                || (pago.isPresent()
-                && pago.get().getEstado().equalsIgnoreCase("MOROSO"));
+                || pagos.stream()
+                .anyMatch(p -> p.getEstado().equalsIgnoreCase("MOROSO"));
     }
 }

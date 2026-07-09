@@ -40,6 +40,8 @@ public class FinanzaControllerTest {
         finanzaDTO.setRutSocio("12345678-9");
         finanzaDTO.setMonto(BigDecimal.valueOf(20000.0));
         finanzaDTO.setEstado("PENDIENTE");
+        finanzaDTO.setMes(7);
+        finanzaDTO.setAnio(2026);
 
         // MODEL lo que devuelve el service
         finanzaModel = new finanzaModel();
@@ -47,6 +49,8 @@ public class FinanzaControllerTest {
         finanzaModel.setRutSocio("12345678-9");
         finanzaModel.setMonto(BigDecimal.valueOf(20000.0));
         finanzaModel.setEstado("PENDIENTE");
+        finanzaModel.setMes(7);
+        finanzaModel.setAnio(2026);
     }
 
     // 200 OK - GET ALL
@@ -131,4 +135,53 @@ public class FinanzaControllerTest {
 
         assertEquals(500, response.getStatusCode().value());
     }
+
+    @Test
+    void getByMes_200(){
+
+        when(service.obtenerPagosPorMes(7))
+                .thenReturn(List.of(finanzaModel));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerPorMes(7);
+
+        assertEquals(200,response.getStatusCode().value());
+    }
+
+    @Test
+    void getByAnio_200(){
+
+        when(service.obtenerPagosPorAnio(2026))
+                .thenReturn(List.of(finanzaModel));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerPorAnio(2026);
+
+        assertEquals(200,response.getStatusCode().value());
+    }
+
+    @Test
+    void getHistorial_200(){
+
+        when(service.obtenerHistorialPagos("12345678-9"))
+                .thenReturn(List.of(finanzaModel));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerHistorial("12345678-9");
+
+        assertEquals(200,response.getStatusCode().value());
+    }
+
+    @Test
+    void getPeriodo_200(){
+
+        when(service.obtenerPagosPorPeriodo(7,2026))
+                .thenReturn(List.of(finanzaModel));
+
+        ResponseEntity<List<finanzaModel>> response =
+                controller.obtenerPorPeriodo(7,2026);
+
+        assertEquals(200,response.getStatusCode().value());
+    }
+
 }

@@ -13,7 +13,6 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     private ResponseEntity<Object> respuesta(
             HttpStatus status,
             String mensaje,
@@ -29,6 +28,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(body, status);
     }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> manejarValidaciones(
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
             RuntimeException ex,
             WebRequest request
     ) {
-        return respuesta(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+        return respuesta(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class)

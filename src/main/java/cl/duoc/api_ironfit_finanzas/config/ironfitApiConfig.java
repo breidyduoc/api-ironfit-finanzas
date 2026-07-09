@@ -16,7 +16,7 @@ public class ironfitApiConfig {
                 .info(new Info()
                         .title ("API ironfit(finanzas) - Servicio de ironfit")
                         .description ("Gestiona el acceso de las finanzas - CRUD Completo")
-                        .version ("3.0")
+                        .version ("4.0")
                         .contact(new Contact()
                                 .name("DoucUC")
                                 .email("soporte@duoc.cl"))

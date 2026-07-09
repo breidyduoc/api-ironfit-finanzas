@@ -20,7 +20,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v3/pagos")
+@RequestMapping("/api/v4/pagos")
 public class finanzaController {
 
     private final finanzaService service;
@@ -58,7 +58,6 @@ public class finanzaController {
     }
 
 
-
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar pago por ID",
@@ -68,42 +67,11 @@ public class finanzaController {
             @ApiResponse(responseCode = "200", description = "Pago encontrado"),
             @ApiResponse(responseCode = "404", description = "Pago no encontrado")
     })
-
-    public ResponseEntity<finanzaModel> obtenerPorId(
-            @Parameter(
-                    description = "ID del pago",
-                    example = "1"
-            )
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<finanzaModel> obtenerPorId(@Parameter(description = "ID del pago",example = "1") @PathVariable Long id) {
         return service.obtenerPagoPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-
-
-    @GetMapping("/rut/{rut}")
-    @Operation(
-            summary = "Buscar pago por RUT",
-            description = "Obtiene el pago asociado al RUT del socio"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pago encontrado"),
-            @ApiResponse(responseCode = "404", description = "Pago no encontrado")
-    })
-    public ResponseEntity<finanzaModel> obtenerPorRut(
-            @Parameter(
-                    description = "RUT del socio",
-                    example = "12345678-9"
-            )
-            @PathVariable String rut
-    ) {
-        return service.obtenerPagoPorRut(rut)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
 
 
     @GetMapping("/estado/{estado}")
@@ -142,13 +110,7 @@ public class finanzaController {
                     )
             )
     })
-    public ResponseEntity<List<finanzaModel>> obtenerPorEstado(
-            @Parameter(
-                    description = "Estado del pago",
-                    example = "MOROSO"
-            )
-            @PathVariable String estado
-    ) {
+    public ResponseEntity<List<finanzaModel>> obtenerPorEstado(@Parameter(description = "Estado del pago",example = "MOROSO") @PathVariable String estado) {
         List<finanzaModel> pagos = service.obtenerPagoPorEstado(estado);
 
         if (pagos.isEmpty()) {
@@ -158,6 +120,62 @@ public class finanzaController {
         return ResponseEntity.ok(pagos);
     }
 
+
+    @GetMapping("/mes/{mes}")
+    @Operation(
+            summary = "Buscar pagos por mes",
+            description = "Obtiene todos los pagos registrados para un mes específico."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pagos encontrados"),
+            @ApiResponse(responseCode = "404", description = "No existen pagos para ese mes")
+    })
+    public ResponseEntity<List<finanzaModel>> obtenerPorMes(@Parameter(description = "Mes del pago", example = "7") @PathVariable Integer mes) {
+        return ResponseEntity.ok(service.obtenerPagosPorMes(mes));
+    }
+
+
+    @GetMapping("/anio/{anio}")
+    @Operation(
+            summary = "Buscar pagos por año",
+            description = "Obtiene todos los pagos registrados durante un año."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pagos encontrados"),
+            @ApiResponse(responseCode = "404", description = "No existen pagos para ese año")
+    })
+    public ResponseEntity<List<finanzaModel>> obtenerPorAnio(@Parameter(description = "Año del pago", example = "2026") @PathVariable Integer anio) {
+        return ResponseEntity.ok(service.obtenerPagosPorAnio(anio));
+    }
+
+
+    @GetMapping("/periodo")
+    @Operation(
+            summary = "Buscar pagos por período",
+            description = "Permite generar consultas financieras por período, utilizando mes y año como criterios de búsqueda."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pagos encontrados"),
+            @ApiResponse(responseCode = "404", description = "No existen pagos para ese período")
+    })
+    public ResponseEntity<List<finanzaModel>> obtenerPorPeriodo(@Parameter(description = "Mes del período", example = "7")@RequestParam Integer mes,
+                                                                @Parameter(description = "Año del período", example = "2026")@RequestParam Integer anio){
+        return ResponseEntity.ok(service.obtenerPagosPorPeriodo(mes, anio));
+    }
+
+
+    @GetMapping("/historial/{rut}")
+    @Operation(
+            summary = "Obtener historial de pagos",
+            description = "Devuelve el historial financiero completo del socio ordenado desde el pago más reciente al más antiguo."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Historial obtenido correctamente"),
+            @ApiResponse(responseCode = "404", description = "El socio no posee pagos registrados")
+    })
+    public ResponseEntity<List<finanzaModel>> obtenerHistorial(@Parameter(description = "RUT del socio", example = "12345678-9")@PathVariable String rut) {
+        return ResponseEntity.ok(service.obtenerHistorialPagos(rut));
+    }
 
 
     @PostMapping
@@ -180,15 +198,13 @@ public class finanzaController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Pago creado correctamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos")
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o regla de negocio incumplida"),
+            @ApiResponse(responseCode = "404", description = "Socio no encontrado")
     })
-    public ResponseEntity<finanzaModel> crearPago(
-            @Valid @RequestBody finanzaDTO dto
-    ) {
+    public ResponseEntity<finanzaModel> crearPago(@Valid @RequestBody finanzaDTO dto) {
         finanzaModel nuevoPago = service.crearPago(dto);
         return new ResponseEntity<>(nuevoPago, HttpStatus.CREATED);
     }
-
 
 
     @PutMapping("/{id}")
@@ -214,19 +230,12 @@ public class finanzaController {
             @ApiResponse(responseCode = "404", description = "Pago no encontrado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
-    public ResponseEntity<finanzaModel> actualizarPago(
-            @Parameter(
-                    description = "ID del pago",
-                    example = "1"
-            )
-            @PathVariable Long id,
-            @Valid @RequestBody finanzaDTO dto
-    ) {
+    public ResponseEntity<finanzaModel> actualizarPago(@Parameter(description = "ID del pago",example = "1")@PathVariable Long id,
+                                                       @Valid @RequestBody finanzaDTO dto) {
         return service.actualizarPago(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
 
     @PatchMapping("/{id}")
@@ -239,22 +248,14 @@ public class finanzaController {
             @ApiResponse(responseCode = "404", description = "Pago no encontrado"),
             @ApiResponse(responseCode = "400", description = "Estado inválido")
     })
-    public ResponseEntity<finanzaModel> actualizarEstado(
-            @Parameter(
-                    description = "ID del pago",
-                    example = "1"
-            )
-            @PathVariable Long id,
-            @RequestBody Map<String, String> request
-    ) {
+    public ResponseEntity<finanzaModel> actualizarEstado(@Parameter(description = "ID del pago",example = "1")@PathVariable Long id,
+                                                         @RequestBody Map<String, String> request) {
         String nuevoEstado = request.get("estado");
 
         return service.actualizarEstado(id, nuevoEstado)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-
 
     @DeleteMapping("/{id}")
     @Operation(
@@ -265,13 +266,7 @@ public class finanzaController {
             @ApiResponse(responseCode = "204", description = "Pago eliminado correctamente"),
             @ApiResponse(responseCode = "404", description = "Pago no encontrado")
     })
-    public ResponseEntity<Void> eliminarPago(
-            @Parameter(
-                    description = "ID del pago",
-                    example = "1"
-            )
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> eliminarPago(@Parameter(description = "ID del pago",example = "1")@PathVariable Long id) {
         if (service.borrarPago(id)) {
             return ResponseEntity.noContent().build();
         }
@@ -280,11 +275,10 @@ public class finanzaController {
     }
 
 
-
     @GetMapping("/deuda/{rut}")
     @Operation(
             summary = "Verificar deuda de un socio",
-            description = "Consulta si un socio posee deuda vigente para permitir o restringir su acceso"
+            description = "Consulta el estado financiero del socio verificando su información en ambos microservicios (Socios y Finanzas)."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Consulta realizada correctamente",
@@ -294,13 +288,7 @@ public class finanzaController {
                                     @ExampleObject(value = "false")
                             }))
     })
-    public ResponseEntity<Boolean> verificarDeuda(
-            @Parameter(
-                    description = "RUT del socio",
-                    example = "12345678-9"
-            )
-            @PathVariable String rut
-    ) {
+    public ResponseEntity<Boolean> verificarDeuda(@Parameter(description = "RUT del socio",example = "12345678-9")@PathVariable String rut) {
         return ResponseEntity.ok(service.tieneDeuda(rut));
     }
 }

@@ -39,6 +39,8 @@ public class FinanzaServiceTest {
         finanzaDTO.setRutSocio("12345678-9");
         finanzaDTO.setMonto(BigDecimal.valueOf(20000.0));
         finanzaDTO.setEstado("PENDIENTE");
+        finanzaDTO.setMes(7);
+        finanzaDTO.setAnio(2026);
 
         // MODEL entrada repository
         finanzaModel = new finanzaModel();
@@ -46,6 +48,8 @@ public class FinanzaServiceTest {
         finanzaModel.setRutSocio("12345678-9");
         finanzaModel.setMonto(BigDecimal.valueOf(20000.0));
         finanzaModel.setEstado("PENDIENTE");
+        finanzaModel.setMes(7);
+        finanzaModel.setAnio(2026);
     }
 
     // GET ALL - 200 OK
@@ -84,6 +88,11 @@ public class FinanzaServiceTest {
     // CREATE - 201 OK
     @Test
     void create_201() {
+        when(repository.findByRutSocioAndMesAndAnio(
+                any(),
+                any(),
+                any()))
+                .thenReturn(Optional.empty());
 
         when(repository.save(any(finanzaModel.class)))
                 .thenReturn(finanzaModel);
@@ -104,5 +113,88 @@ public class FinanzaServiceTest {
 
         assertThrows(RuntimeException.class,
                 () -> service.obtenerTodosLosPagos());
+    }
+
+    @Test
+    void create_duplicatePayment() {
+
+        when(repository.findByRutSocioAndMesAndAnio(
+                any(),
+                any(),
+                any()))
+                .thenReturn(Optional.of(finanzaModel));
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.crearPago(finanzaDTO)
+        );
+    }
+
+    @Test
+    void getHistorial_ok() {
+
+        when(repository.findByRutSocioOrderByAnioDescMesDesc("12345678-9"))
+                .thenReturn(List.of(finanzaModel));
+
+        List<finanzaModel> result =
+                service.obtenerHistorialPagos("12345678-9");
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getHistorial_notFound() {
+
+        when(repository.findByRutSocioOrderByAnioDescMesDesc("12345678-9"))
+                .thenReturn(List.of());
+
+        assertThrows(RuntimeException.class,
+                () -> service.obtenerHistorialPagos("12345678-9"));
+    }
+
+    @Test
+    void getByMes_ok() {
+
+        when(repository.findByMes(7))
+                .thenReturn(List.of(finanzaModel));
+
+        List<finanzaModel> result =
+                service.obtenerPagosPorMes(7);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getByAnio_ok() {
+
+        when(repository.findByAnio(2026))
+                .thenReturn(List.of(finanzaModel));
+
+        List<finanzaModel> result =
+                service.obtenerPagosPorAnio(2026);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getByPeriodo_ok() {
+
+        when(repository.findByMesAndAnio(7, 2026))
+                .thenReturn(List.of(finanzaModel));
+
+        List<finanzaModel> result =
+                service.obtenerPagosPorPeriodo(7,2026);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getByPeriodo_notFound() {
+
+        when(repository.findByMesAndAnio(7,2026))
+                .thenReturn(List.of());
+
+        assertThrows(RuntimeException.class,
+                () -> service.obtenerPagosPorPeriodo(7,2026));
     }
 }
