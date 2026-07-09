@@ -1,5 +1,6 @@
 package cl.duoc.api_ironfit_finanzas.controller;
 
+import cl.duoc.api_ironfit_finanzas.dto.estadoFinancieroDTO;
 import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
 import cl.duoc.api_ironfit_finanzas.service.finanzaService;
@@ -177,6 +178,20 @@ public class finanzaController {
         return ResponseEntity.ok(service.obtenerHistorialPagos(rut));
     }
 
+    @GetMapping("/socio/{rut}/estado")
+    @Operation(
+            summary = "Consultar estado financiero del socio",
+            description = "Entrega información financiera resumida del socio"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Consulta realizada correctamente")
+    })
+    public ResponseEntity<estadoFinancieroDTO> estadoFinanciero(@PathVariable String rut){
+
+        return ResponseEntity.ok(
+                service.obtenerEstadoFinanciero(rut)
+        );
+    }
 
     @PostMapping
     @io.swagger.v3.oas.annotations.parameters.RequestBody(

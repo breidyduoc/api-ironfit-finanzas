@@ -1,5 +1,6 @@
 package cl.duoc.api_ironfit_finanzas.service;
 
+import cl.duoc.api_ironfit_finanzas.dto.estadoFinancieroDTO;
 import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
 import cl.duoc.api_ironfit_finanzas.dto.socioDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
@@ -74,6 +75,36 @@ public class finanzaService {
         }
 
         return pagos;
+    }
+
+    public estadoFinancieroDTO obtenerEstadoFinanciero(String rut){
+
+        List<finanzaModel> pagos =
+                repository.findByRutSocio(rut);
+
+
+        boolean deuda = pagos.stream()
+                .anyMatch(
+                        pago -> pago.getEstado()
+                                .equalsIgnoreCase("MOROSO")
+                );
+
+
+        estadoFinancieroDTO dto =
+                new estadoFinancieroDTO();
+
+        dto.setRut(rut);
+        dto.setPoseeDeuda(deuda);
+
+
+        if(deuda){
+            dto.setEstado("MOROSO");
+        }else{
+            dto.setEstado("AL DIA");
+        }
+
+
+        return dto;
     }
 
     @Transactional
