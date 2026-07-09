@@ -6,30 +6,31 @@ Microservicio encargado de la gestión financiera de los socios dentro del siste
 
 Permite:
 
-- Registrar pagos  
-- Consultar pagos  
-- Actualizar pagos  
-- Eliminar pagos  
-- Verificar deudas  
-- Integración con API Socios  
+- Registrar pagos
+- Consultar pagos
+- Actualizar pagos
+- Eliminar pagos
+- Consultar historial de pagos de un socio
+- Consultar pagos por estado, mes, año y período
+- Verificar deudas mediante integración con la API Socios
 
 ---
 
 ## Tecnologías utilizadas
 
-- Java 21  
-- Spring Boot  
-- Spring Data JPA  
-- Oracle Database  
-- Oracle SQL Developer  
-- Swagger/OpenAPI  
-- Maven  
-- Lombok  
-- Validation API  
-- RestTemplate  
-- JUnit 5  
-- Mockito  
-- Global Exception Handler (`@RestControllerAdvice`)  
+- Java 21
+- Spring Boot
+- Spring Data JPA
+- Oracle Database
+- Oracle SQL Developer
+- Swagger/OpenAPI
+- Maven
+- Lombok
+- Jakarta Validation
+- RestTemplate
+- JUnit 5
+- Mockito
+- Global Exception Handler (`@RestControllerAdvice`)
 
 ---
 
@@ -53,6 +54,8 @@ DB_USER=TU_USUARIO
 DB_PASSWORD=TU_PASSWORD
 ```
 
+> Para la evaluación se puede configurar directamente la conexión en `application.yml` si no se utilizarán variables de entorno.
+
 ---
 
 ## Script SQL
@@ -74,9 +77,9 @@ CREATE TABLE PAGO (
 
 ## Ejecución
 
-- Clonar repositorio  
-- Configurar variables de entorno  
-- Ejecutar script SQL en Oracle  
+- Clonar el repositorio.
+- Configurar la conexión a Oracle.
+- Ejecutar el script SQL.
 - Ejecutar:
 
 ```bash
@@ -94,43 +97,70 @@ mvn spring-boot:run
 
 ## Swagger
 
+```
 http://localhost:21503/swagger-ui/index.html
+```
 
 ---
 
-## Endpoints principales
+# Endpoints principales
 
-- GET /api/v3/pagos  
-- GET /api/v3/pagos/{id}  
-- GET /api/v3/pagos/rut/{rut}  
-- GET /api/v3/pagos/estado/{estado}  
-- POST /api/v3/pagos  
-- PUT /api/v3/pagos/{id}  
-- PATCH /api/v3/pagos/{id}  
-- DELETE /api/v3/pagos/{id}  
-- GET /api/v3/pagos/deuda/{rut}  
+## Consultas
+
+- GET /api/v4/pagos
+- GET /api/v4/pagos/{id}
+- GET /api/v4/pagos/estado/{estado}
+- GET /api/v4/pagos/mes/{mes}
+- GET /api/v4/pagos/anio/{anio}
+- GET /api/v4/pagos/periodo?mes={mes}&anio={anio}
+- GET /api/v4/pagos/historial/{rut}
+- GET /api/v4/pagos/deuda/{rut}
+
+## Gestión
+
+- POST /api/v4/pagos
+- PUT /api/v4/pagos/{id}
+- PATCH /api/v4/pagos/{id}
+- DELETE /api/v4/pagos/{id}
 
 ---
 
 ## Integración entre microservicios
 
-La API Finanzas utiliza `RestTemplate` para comunicarse con la API Socios.
+La API Finanzas consume información de la API Socios mediante **RestTemplate** para verificar el estado del socio y determinar si posee deuda.
 
-### Flujo:
+### Flujo
 
-API Finanzas → consulta API Socios → valida existencia del socio → verifica pagos/deudas
+```
+API Finanzas
+      │
+      ▼
+Consulta API Socios
+      │
+      ▼
+Obtiene estado del socio
+      │
+      ▼
+Consulta historial de pagos
+      │
+      ▼
+Determina si posee deuda
+```
 
 ---
 
 ## Manejo global de excepciones
 
-El proyecto implementa un Global Exception Handler para centralizar errores.
+El proyecto implementa un Global Exception Handler para centralizar el manejo de errores.
 
 ### Errores gestionados
 
-- 400 Bad Request → datos inválidos  
-- 404 Not Found → pago o socio no encontrado  
-- 500 Internal Server Error → errores internos o fallos de integración  
+- 200 OK
+- 201 Created
+- 204 No Content
+- 400 Bad Request
+- 404 Not Found
+- 500 Internal Server Error
 
 ---
 
@@ -138,11 +168,11 @@ El proyecto implementa un Global Exception Handler para centralizar errores.
 
 ```json
 {
-  "fecha": "2026-06-28T12:30:00",
-  "status": 500,
-  "error": "Internal Server Error",
-  "mensaje": "Error interno del servidor",
-  "ruta": "/api/v3/pagos/deuda/12345678-9"
+  "fecha": "2026-07-09T12:30:00",
+  "status": 404,
+  "error": "Not Found",
+  "mensaje": "No existe un pago para el período indicado",
+  "ruta": "/api/v4/pagos/periodo"
 }
 ```
 
@@ -150,27 +180,41 @@ El proyecto implementa un Global Exception Handler para centralizar errores.
 
 ### Beneficios
 
-- Manejo centralizado  
-- Respuestas uniformes  
-- Mejor diagnóstico  
-- Mejor cobertura de pruebas  
+- Manejo centralizado de excepciones.
+- Respuestas consistentes para todos los endpoints.
+- Facilita el mantenimiento.
+- Facilita el diagnóstico de errores.
+- Mejora la cobertura de pruebas.
 
 ---
 
 ## Testing
 
-Incluye pruebas unitarias de:
+El proyecto incluye pruebas unitarias para:
 
-- Model  
-- Service  
-- Controller  
+- Model
+- Service
+- Controller
 
 ### Cobertura
 
-- 200 OK  
-- 201 CREATED  
-- 400 BAD REQUEST  
-- 404 NOT FOUND  
-- 500 INTERNAL SERVER ERROR  
+- 200 OK
+- 201 Created
+- 204 No Content
+- 400 Bad Request
+- 404 Not Found
+- 500 Internal Server Error
 
-Los errores son manejados mediante el Global Exception Handler.
+Se incluyen pruebas para:
+
+- Consulta de pagos.
+- Registro de pagos.
+- Actualización de pagos.
+- Eliminación.
+- Historial de pagos.
+- Consulta por estado.
+- Consulta por mes.
+- Consulta por año.
+- Consulta por período.
+- Verificación de deuda.
+- Manejo de excepciones mediante Global Exception Handler.
