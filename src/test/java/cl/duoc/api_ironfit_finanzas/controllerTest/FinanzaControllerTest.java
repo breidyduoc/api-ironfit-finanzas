@@ -1,6 +1,7 @@
 package cl.duoc.api_ironfit_finanzas.controllerTest;
 
 import cl.duoc.api_ironfit_finanzas.controller.finanzaController;
+import cl.duoc.api_ironfit_finanzas.dto.estadoFinancieroDTO;
 import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
 import cl.duoc.api_ironfit_finanzas.service.finanzaService;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -30,6 +32,7 @@ public class FinanzaControllerTest {
     private finanzaController controller;
 
     private finanzaDTO finanzaDTO;
+    private estadoFinancieroDTO estado;
     private finanzaModel finanzaModel;
 
     @BeforeEach
@@ -42,6 +45,12 @@ public class FinanzaControllerTest {
         finanzaDTO.setEstado("PENDIENTE");
         finanzaDTO.setMes(7);
         finanzaDTO.setAnio(2026);
+
+        // DTO lo que recibe estado
+        estado = new estadoFinancieroDTO();
+        estado.setRut("12345678-9");
+        estado.setPoseeDeuda(true);
+        estado.setEstado("MOROSO");
 
         // MODEL lo que devuelve el service
         finanzaModel = new finanzaModel();
@@ -183,5 +192,29 @@ public class FinanzaControllerTest {
 
         assertEquals(200,response.getStatusCode().value());
     }
+
+    @Test
+    void obtenerEstadoFinancieroOk(){
+
+        when(service.obtenerEstadoFinanciero("12345678-9"))
+                .thenReturn(estado);
+
+
+        ResponseEntity<estadoFinancieroDTO> response =
+                controller.estadoFinanciero("12345678-9");
+
+
+        assertEquals(
+                HttpStatus.OK,
+                response.getStatusCode()
+        );
+
+        assertNotNull(response.getBody());
+
+        assertTrue(
+                response.getBody().isPoseeDeuda()
+        );
+    }
+
 
 }

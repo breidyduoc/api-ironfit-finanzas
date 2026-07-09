@@ -1,5 +1,6 @@
 package cl.duoc.api_ironfit_finanzas.serviceTest;
 
+import cl.duoc.api_ironfit_finanzas.dto.estadoFinancieroDTO;
 import cl.duoc.api_ironfit_finanzas.dto.finanzaDTO;
 import cl.duoc.api_ironfit_finanzas.model.finanzaModel;
 import cl.duoc.api_ironfit_finanzas.repository.finanzaRepository;
@@ -196,5 +197,53 @@ public class FinanzaServiceTest {
 
         assertThrows(RuntimeException.class,
                 () -> service.obtenerPagosPorPeriodo(7,2026));
+    }
+
+    @Test
+    void obtenerEstadoFinancieroConDeuda(){
+
+        finanzaModel pago = new finanzaModel();
+
+        pago.setRutSocio("12345678-9");
+        pago.setEstado("MOROSO");
+
+
+        when(repository.findByRutSocio("12345678-9"))
+                .thenReturn(List.of(pago));
+
+
+        estadoFinancieroDTO resultado =
+                service.obtenerEstadoFinanciero("12345678-9");
+
+
+        assertTrue(resultado.isPoseeDeuda());
+        assertEquals(
+                "MOROSO",
+                resultado.getEstado()
+        );
+    }
+
+    @Test
+    void obtenerEstadoFinancieroSinDeuda(){
+
+        finanzaModel pago = new finanzaModel();
+
+        pago.setRutSocio("12345678-9");
+        pago.setEstado("PAGADO");
+
+
+        when(repository.findByRutSocio("12345678-9"))
+                .thenReturn(List.of(pago));
+
+
+        estadoFinancieroDTO resultado =
+                service.obtenerEstadoFinanciero("12345678-9");
+
+
+        assertFalse(resultado.isPoseeDeuda());
+        assertEquals(
+                "AL DIA",
+                resultado.getEstado()
+        );
     }
 }
